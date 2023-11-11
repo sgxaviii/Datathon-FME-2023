@@ -22,9 +22,12 @@ def dades():
     df['CODIGO'] = df['CODIGO'].str[1::]
     df['NUMERO'] = df['NUMERO'].str.split('/')
     df['NUMERO'] = df['NUMERO'].str[0]
-    df['MES'] = pd.to_datetime(df['FECHAPEDIDO']).dt.month
-    df['ANY'] = pd.to_datetime(df['FECHAPEDIDO']).dt.year
-    df.drop(columns=['PRODUCTO', 'IMPORTELINEA', 'REFERENCIA', 'FECHAPEDIDO', 'CANTIDADCOMPRA', 'UNIDADESCONSUMOCONTENIDAS'], inplace=True)
+    df['FECHAPEDIDO'] = pd.to_datetime(df['FECHAPEDIDO'], infer_datetime_format = True)
+    df['MES'] = df['FECHAPEDIDO'].dt.month
+    df['ANY'] = df['FECHAPEDIDO'].dt.year
+    df['DEPARTAMENT'] = df['ORIGEN'].str.split('-')
+    df['ORIGEN'] = df['DEPARTAMENT'].str[0] + '-' + df['DEPARTAMENT'].str[1]
+    df.drop(columns=['PRODUCTO', 'IMPORTELINEA', 'REFERENCIA', 'CANTIDADCOMPRA', 'UNIDADESCONSUMOCONTENIDAS', 'DEPARTAMENT'], inplace=True)
     return df
 
 """
@@ -32,10 +35,12 @@ Pre: rebem un dataframe i un codi de producte
 Post: s'imprimeix per la terminal el gràfic amb les compres totals del producte cada mes
 Brief: Agafa les dades i un codi de producte i retorna un gràfic amb les compres totals cada mes d'aquest producte
 """
-def graficar(df, codi):
+def graficar(df, categoria, origen):
 
-    df = df.where(df['CODIGO']==codi)
-    df = df[['CAJA', 'MES', 'ANY']]
+    #df = df.where(df['CATEGORIA']==categoria)
+    #df = df.where(df['ORIGEN']==origen)
+    df = df[['CAJA','FECHAPEDIDO','MES', 'ANY']]
+    df.set_index('FECHAPEDIDO')
     df = df.groupby(['ANY','MES'])['CAJA'].sum()
     df = df.to_frame()
 
