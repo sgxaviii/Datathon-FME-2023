@@ -15,10 +15,6 @@ def dades():
     df.loc[df['CATEGORIA'] == 'F', 'CATEGORIA'] = 3
     df.loc[df['CATEGORIA'] == 'C', 'CATEGORIA'] = 4
     df['CAJA'] = df['CANTIDADCOMPRA']/df['UNIDADESCONSUMOCONTENIDAS']
-    df['ORIGEN'] = df['ORIGEN'].str.split('-')
-    df['REGIO_ORIGEN'] = df['ORIGEN'].str[0]
-    df['HOSPITAL_ORIGEN'] = df['ORIGEN'].str[1]
-    df['DEPARTAMENT_ORIGEN'] = df['ORIGEN'].str[2]
     df['TGL'].loc[df['TGL'] == 'TRANSITO'] = 1
     df['TGL'].loc[df['TGL'] == 'ALMACENABLE'] = 0
     df['TIPOCOMPRA'].loc[df['TIPOCOMPRA'] == 'Compra menor'] = 1
@@ -28,7 +24,7 @@ def dades():
     df['NUMERO'] = df['NUMERO'].str[0]
     df['MES'] = pd.to_datetime(df['FECHAPEDIDO']).dt.month
     df['ANY'] = pd.to_datetime(df['FECHAPEDIDO']).dt.year
-    df.drop(columns=['PRODUCTO', 'IMPORTELINEA', 'REFERENCIA', 'ORIGEN', 'FECHAPEDIDO', 'CANTIDADCOMPRA', 'UNIDADESCONSUMOCONTENIDAS'], inplace=True)
+    df.drop(columns=['PRODUCTO', 'IMPORTELINEA', 'REFERENCIA', 'FECHAPEDIDO', 'CANTIDADCOMPRA', 'UNIDADESCONSUMOCONTENIDAS'], inplace=True)
     return df
 
 """
@@ -38,7 +34,7 @@ Brief: Agafa les dades i un codi de producte i retorna un gràfic amb les compre
 """
 def graficar(df, codi):
 
-    df = df.where(df['CATEGORIA']==codi)
+    df = df.where(df['CODIGO']==codi)
     df = df[['CAJA', 'MES', 'ANY']]
     df = df.groupby(['ANY','MES'])['CAJA'].sum()
     df = df.to_frame()
