@@ -15,10 +15,6 @@ def dades():
     df.loc[df['CATEGORIA'] == 'F', 'CATEGORIA'] = 3
     df.loc[df['CATEGORIA'] == 'C', 'CATEGORIA'] = 4
     df['CAJA'] = df['CANTIDADCOMPRA']/df['UNIDADESCONSUMOCONTENIDAS']
-    df['ORIGEN'] = df['ORIGEN'].str.split('-')
-    df['REGIO_ORIGEN'] = df['ORIGEN'].str[0]
-    df['HOSPITAL_ORIGEN'] = df['ORIGEN'].str[1]
-    df['DEPARTAMENT_ORIGEN'] = df['ORIGEN'].str[2]
     df['TGL'].loc[df['TGL'] == 'TRANSITO'] = 1
     df['TGL'].loc[df['TGL'] == 'ALMACENABLE'] = 0
     df['TIPOCOMPRA'].loc[df['TIPOCOMPRA'] == 'Compra menor'] = 1
@@ -26,9 +22,12 @@ def dades():
     df['CODIGO'] = df['CODIGO'].str[1::]
     df['NUMERO'] = df['NUMERO'].str.split('/')
     df['NUMERO'] = df['NUMERO'].str[0]
-    df['MES'] = pd.to_datetime(df['FECHAPEDIDO']).dt.month
-    df['ANY'] = pd.to_datetime(df['FECHAPEDIDO']).dt.year
-    df.drop(columns=['PRODUCTO', 'IMPORTELINEA', 'REFERENCIA', 'ORIGEN', 'FECHAPEDIDO', 'CANTIDADCOMPRA', 'UNIDADESCONSUMOCONTENIDAS'], inplace=True)
+    df['FECHAPEDIDO'] = pd.to_datetime(df['FECHAPEDIDO'], infer_datetime_format = True)
+    df['MES'] = df['FECHAPEDIDO'].dt.month
+    df['ANY'] = df['FECHAPEDIDO'].dt.year
+    df['DEPARTAMENT'] = df['ORIGEN'].str.split('-')
+    df['ORIGEN'] = df['DEPARTAMENT'].str[0] + '-' + df['DEPARTAMENT'].str[1]
+    df.drop(columns=['PRODUCTO', 'IMPORTELINEA', 'REFERENCIA', 'CANTIDADCOMPRA', 'UNIDADESCONSUMOCONTENIDAS', 'DEPARTAMENT'], inplace=True)
     return df
 
 """
@@ -36,10 +35,12 @@ Pre: rebem un dataframe i un codi de producte
 Post: s'imprimeix per la terminal el gràfic amb les compres totals del producte cada mes
 Brief: Agafa les dades i un codi de producte i retorna un gràfic amb les compres totals cada mes d'aquest producte
 """
-def graficar(df, codi):
+def graficar(df, categoria, origen):
 
-    df = df.where(df['CATEGORIA']==codi)
-    df = df[['CAJA', 'MES', 'ANY']]
+    #df = df.where(df['CATEGORIA']==categoria)
+    #df = df.where(df['ORIGEN']==origen)
+    df = df[['CAJA','FECHAPEDIDO','MES', 'ANY']]
+    df.set_index('FECHAPEDIDO')
     df = df.groupby(['ANY','MES'])['CAJA'].sum()
     df = df.to_frame()
 
